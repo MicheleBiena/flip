@@ -16,8 +16,8 @@ backgroundColor = makeColor 0 0 0 0
 
 -- Funzione per generare la lista casuale
 generateList :: StdGen -> [Int]
-generateList g = shuffle' (merge zeros (take 18 (randomRs (1, 3) g))) 25 g 
-  where zeros = replicate 7 0
+generateList g = shuffle' (merge zeros (take (25 - maxBombs) (randomRs (1, 3) g))) 25 g 
+  where zeros = replicate maxBombs 0
 
 -- Funzione per unire 2 liste di numeri
 merge :: [Int] -> [Int] -> [Int]

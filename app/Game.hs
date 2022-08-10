@@ -1,7 +1,7 @@
 module Game where
 
 import qualified Data.Set as S
-import GHC.Arr (Array, Ix (range), array, newSTArray)
+import GHC.Arr ( Ix(range), array, Array, (//) )
 import Graphics.Gloss (Picture, loadBMP, Point)
 import Graphics.Gloss.Interface.IO.Interact (Key)
 import System.Random (StdGen, mkStdGen, newStdGen, randomR, randomRIO)
@@ -15,9 +15,7 @@ data Game = Game
   }
   deriving (Eq, Show)
 
-data State = Running | NotesTaking | GameOver Winner deriving (Eq, Show)
-
-data Winner = Player | PC deriving (Eq, Show)
+data State = Running | NotesTaking | GameOver | GameWon deriving (Eq, Show)
 
 
 type Board = Array (Int, Int) Cell
@@ -37,11 +35,18 @@ type Notes = [Content]
 
 data Textures = Textures
   { cell :: Picture,
-    bomb :: Picture
+    bomb :: Picture,
+    one :: Picture,
+    two :: Picture,
+    three :: Picture,
+    noteBomb :: Picture,
+    noteOne :: Picture,
+    noteTwo :: Picture,
+    noteThree :: Picture
   }
   deriving (Eq, Show)
 
-maxBombs :: Integer
+maxBombs :: Int
 maxBombs = 7
 
 gridSize :: Float
@@ -59,25 +64,66 @@ n = 5 -- Tabella 5 x 5
 indexRange :: ((Int, Int), (Int, Int))
 indexRange = ((0, 0), (n - 1, n - 1))
 
+mockupBomb :: Cell
+mockupBomb = Cell {
+  state = Flipped,
+  content = Bomb,
+  notes = []
+} 
+
+mockupNumber :: Cell 
+mockupNumber = Cell {
+  state = Flipped,
+  content = Three,
+  notes = []
+}
+
+mockupNotes :: Cell 
+mockupNotes = Cell {
+  state = Covered,
+  content = Bomb,
+  notes = [One, Two, Bomb]
+  }
+
 loadWorld :: [Int] -> IO Game
 loadWorld numberList = do
-  cellTexture <- loadBMP "img/knight-front.bmp"
-  bombTexture <- loadBMP "img/knight-front.bmp"
+  loadedTextures <- loadTextures 
   let initialState = NotesTaking
   let initialKeys = S.empty
-  let loadedTextures =
-        Textures
-          { cell = cellTexture,
-            bomb = bombTexture
-          }
   return
     Game
-      { board = array indexRange $ zip (range indexRange) (map createCell numberList),
-        gameState = initialState,
+      { board = array indexRange (zip (range indexRange) (map createCell numberList)) // [((4,4), mockupBomb),
+                                                                                         ((0,0), mockupNumber),
+                                                                                         ((2,2), mockupNotes)] 
+                                                                                         ,
+        gameState = NotesTaking,
         cursor = (0,1),
         gameTextures = loadedTextures,
         keys = initialKeys
       }
+
+loadTextures :: IO Textures
+loadTextures = do
+  cellTexture <- loadBMP "img/tile.bmp"
+  bombTexture <- loadBMP "img/bomb.bmp"
+  oneTexture <- loadBMP "img/large_one.bmp"
+  twoTexture <- loadBMP "img/large_two.bmp"
+  threeTexture <- loadBMP "img/large_three.bmp"
+  one_note <- loadBMP "img/note_one.bmp"
+  two_note <- loadBMP "img/note_two.bmp"
+  three_note <- loadBMP "img/note_three.bmp"
+  bomb_note <- loadBMP "img/note_bomb.bmp"
+  return Textures {
+    cell = cellTexture,
+    bomb = bombTexture,
+    one = oneTexture,
+    two = twoTexture,
+    three = threeTexture,
+    noteBomb = bomb_note,
+    noteOne = one_note,
+    noteTwo = two_note,
+    noteThree = three_note
+  }
 
 toContent :: Int -> Content
 toContent 0 = Bomb
