@@ -5,6 +5,7 @@ import Game
 import Graphics.Gloss
 import Graphics.Gloss.Rendering
 import qualified Data.Foldable as Map
+import Data.IntMap (filterWithKey)
 
 playerColor :: Color
 playerColor = makeColorI 50 100 255 255 -- Blue (Vinto)
@@ -21,9 +22,8 @@ notesColor = makeColorI 255 255 0 255 -- Giallo (Note)
 gameAsPicture :: Game -> Picture
 gameAsPicture (Game board state pos textures _) = Pictures [
         cellsOfBoard board textures,
-        notesOfBoard board state textures,
         backgroundGrid,
-        -- drawGameOver state
+        drawGameFinished state board textures,
         drawCursor pos state
     ]
 
@@ -69,56 +69,50 @@ toAbsolutePos :: (Int, Int) -> (Float, Float)
 toAbsolutePos (x, y) = (fromIntegral y * gridSize - screenSize / 2 + lineWidth / 2,
              fromIntegral (-x) * gridSize + screenSize /2 - lineWidth / 2)
 
-
-drawCells :: Board -> Cell -> Picture -> Picture
-drawCells board cell cellPicture =
-    pictures
-    $ map (snapPictureToCell cellPicture . fst)
-    $ filter (\(_, e) -> e == cell)
-    $ assocs board
-
 cellsOfBoard :: Board -> Textures -> Picture
-cellsOfBoard board textures = Pictures [
-       -- drawCells board (Cell Bomb Covered []) (cell textures),
-        --drawCells board (Cell One Covered []) (cell textures),
-        --drawCells board (Cell Two Covered []) (cell textures),
-        -- drawCells board (Cell Three Covered []) (cell textures),
+cellsOfBoard board textures = 
         pictures 
-            $ map (traverseWithGraphics board) [(cell textures, Nothing)],
-        drawCells board (Cell Bomb Flipped []) (bomb textures),
-        drawCells board (Cell One Flipped []) (one textures),
-        drawCells board (Cell Two Flipped []) (two textures),
-        drawCells board (Cell Three Flipped []) (three textures)
-    ]
+            $ map (traverseWithGraphics board) [(cell textures, \(_, e) -> state e == Covered),
+                                                (noteBomb textures, \(_, e) -> state e == Covered && elem Bomb (notes e)),
+                                                (noteOne textures, \(_, e) -> state e == Covered && elem One (notes e)),
+                                                (noteTwo textures, \(_, e) -> state e == Covered && elem Two (notes e)),
+                                                (noteThree textures, \(_, e) -> state e == Covered && elem Three (notes e)),
+                                                (bomb textures, \(_,e) -> state e == Flipped && content e == Bomb),
+                                                (one textures, \(_,e) -> state e == Flipped && content e == One),
+                                                (two textures, \(_,e) -> state e == Flipped && content e == Two),
+                                                (three textures, \(_,e) -> state e == Flipped && content e == Three)]
+    
 
 
 snapPictureToCell :: Picture -> (Int, Int) -> Picture
 snapPictureToCell picture  (row, column) = translate (x + gridSize /2) (y - gridSize/2) picture
     where (x, y) = toAbsolutePos (row, column)
 
-notesOfBoard :: Board -> Game.State -> Textures -> Picture
-notesOfBoard _ Running _ = Blank
-notesOfBoard _ GameOver _ = Blank
-notesOfBoard _ GameWon _ = Blank
-notesOfBoard board NotesTaking textures =
+traverseWithGraphics :: Board -> (Picture, ((Int, Int), Cell) -> Bool) -> Picture
+traverseWithGraphics board (pic, predicate) = 
     pictures 
-    $ map (traverseWithGraphics board) [(cell textures, Nothing),
-        (noteBomb textures, Just Bomb),
-        (noteOne textures, Just One),
-        (noteTwo textures, Just Two),
-        (noteThree textures, Just Three)
-        ]
+        $ map (snapPictureToCell pic . fst) 
+        $ filterWithLambda predicate board
 
 
-traverseWithGraphics :: Board -> (Picture, Maybe Content) -> Picture
-traverseWithGraphics board (pic, Just content) =    
-    pictures
-        $ map (snapPictureToCell pic . fst)                      
-        $ filter (\(_, e) -> state e == Covered && elem content (notes e))
-        $ assocs board
-traverseWithGraphics board (pic, Nothing) = 
-    pictures
-        $ map (snapPictureToCell pic . fst)                      
-        $ filter (\(_, e) -> state e == Covered)
-        $ assocs board
+
+filterWithLambda :: (((Int, Int), Cell) -> Bool) -> Board -> [((Int, Int), Cell)]
+filterWithLambda predicate board = 
+    filter predicate $ assocs board
+
+drawGameFinished :: Game.State -> Board -> Textures -> Picture
+drawGameFinished GameOver _ _ = drawGameOver
+drawGameFinished GameWon _ _= drawGameWon
+drawGameFinished ShowSolutions board textures = cellsOfBoard board textures
+drawGameFinished _ _ _ = Blank
+
+drawGameOver :: Picture
+drawGameOver = Pictures [
+    color white $ rectangleSolid 400 100,
+    Scale 0.25 0.25 $ Translate (-700) (-30) $ text "Mi dispiace, hai perso"
+    ]
+
+drawGameWon :: Picture
+drawGameWon = Blank
+
 

@@ -15,7 +15,7 @@ data Game = Game
   }
   deriving (Eq, Show)
 
-data State = Running | NotesTaking | GameOver | GameWon deriving (Eq, Show)
+data State = Running | NotesTaking | GameOver | GameWon | ShowSolutions deriving (Eq, Show)
 
 
 type Board = Array (Int, Int) Cell
@@ -80,7 +80,7 @@ mockupNumber = Cell {
 
 mockupNotes :: Cell 
 mockupNotes = Cell {
-  state = Covered,
+  state = Flipped,
   content = Bomb,
   notes = [One, Two, Bomb]
   }
@@ -88,16 +88,17 @@ mockupNotes = Cell {
 loadWorld :: [Int] -> IO Game
 loadWorld numberList = do
   loadedTextures <- loadTextures 
-  let initialState = NotesTaking
+  let initialState = GameOver
   let initialKeys = S.empty
+  let initialCursor = (0,0)
   return
     Game
       { board = array indexRange (zip (range indexRange) (map createCell numberList)) // [((4,4), mockupBomb),
                                                                                          ((0,0), mockupNumber),
                                                                                          ((2,2), mockupNotes)] 
                                                                                          ,
-        gameState = NotesTaking,
-        cursor = (0,1),
+        gameState = initialState,
+        cursor = initialCursor,
         gameTextures = loadedTextures,
         keys = initialKeys
       }
@@ -136,6 +137,6 @@ createCell :: Int -> Cell
 createCell number =
   Cell
     { content = toContent number,
-      state = Covered,
+      state = Flipped,
       notes = []
     }
