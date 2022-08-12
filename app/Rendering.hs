@@ -4,8 +4,9 @@ import GHC.Arr (assocs)
 import Game
 import Graphics.Gloss
 import Graphics.Gloss.Rendering
-import qualified Data.Foldable as Map
-import Data.IntMap (filterWithKey)
+
+gridColor :: Color
+gridColor = makeColorI 192 192 192 255
 
 playerColor :: Color
 playerColor = makeColorI 50 100 255 255 -- Blue (Vinto)
@@ -22,13 +23,17 @@ notesColor = makeColorI 255 255 0 255 -- Giallo (Note)
 gameAsPicture :: Game -> Picture
 gameAsPicture (Game board state pos textures _) = Pictures [
         cellsOfBoard board textures,
+        drawSingleCounter (0, 5) 0 0 textures,
+        --drawSingleCounter (5, 5) 10 0,
+        --drawSingleCounter (5, 0) 8 0,
         backgroundGrid,
+        drawCounters board textures,
         drawGameFinished state board textures,
         drawCursor pos state
     ]
 
 backgroundGrid :: Picture
-backgroundGrid = Color (makeColorI 192 192 192 255) $ Pictures [
+backgroundGrid = Color gridColor $ Pictures [
         Translate 0 0 verticalLine,
         Translate r 0 verticalLine,
         Translate (2 * r) 0 verticalLine,
@@ -70,8 +75,8 @@ toAbsolutePos (x, y) = (fromIntegral y * gridSize - screenSize / 2 + lineWidth /
              fromIntegral (-x) * gridSize + screenSize /2 - lineWidth / 2)
 
 cellsOfBoard :: Board -> Textures -> Picture
-cellsOfBoard board textures = 
-        pictures 
+cellsOfBoard board textures =
+        pictures
             $ map (traverseWithGraphics board) [(cell textures, \(_, e) -> state e == Covered),
                                                 (noteBomb textures, \(_, e) -> state e == Covered && elem Bomb (notes e)),
                                                 (noteOne textures, \(_, e) -> state e == Covered && elem One (notes e)),
@@ -81,7 +86,7 @@ cellsOfBoard board textures =
                                                 (one textures, \(_,e) -> state e == Flipped && content e == One),
                                                 (two textures, \(_,e) -> state e == Flipped && content e == Two),
                                                 (three textures, \(_,e) -> state e == Flipped && content e == Three)]
-    
+
 
 
 snapPictureToCell :: Picture -> (Int, Int) -> Picture
@@ -89,30 +94,46 @@ snapPictureToCell picture  (row, column) = translate (x + gridSize /2) (y - grid
     where (x, y) = toAbsolutePos (row, column)
 
 traverseWithGraphics :: Board -> (Picture, ((Int, Int), Cell) -> Bool) -> Picture
-traverseWithGraphics board (pic, predicate) = 
-    pictures 
-        $ map (snapPictureToCell pic . fst) 
+traverseWithGraphics board (pic, predicate) =
+    pictures
+        $ map (snapPictureToCell pic . fst)
         $ filterWithLambda predicate board
 
 
 
 filterWithLambda :: (((Int, Int), Cell) -> Bool) -> Board -> [((Int, Int), Cell)]
-filterWithLambda predicate board = 
+filterWithLambda predicate board =
     filter predicate $ assocs board
 
 drawGameFinished :: Game.State -> Board -> Textures -> Picture
-drawGameFinished GameOver _ _ = drawGameOver
-drawGameFinished GameWon _ _= drawGameWon
+drawGameFinished GameOver _ textures = gameOverText textures
+drawGameFinished GameWon _ textures = gameWonText textures
 drawGameFinished ShowSolutions board textures = cellsOfBoard board textures
 drawGameFinished _ _ _ = Blank
 
-drawGameOver :: Picture
-drawGameOver = Pictures [
-    color white $ rectangleSolid 400 100,
-    Scale 0.25 0.25 $ Translate (-700) (-30) $ text "Mi dispiace, hai perso"
-    ]
+-- Contatori laterali
+drawCounters :: Board -> Textures -> Picture
+drawCounters board textures = Blank
 
-drawGameWon :: Picture
-drawGameWon = Blank
+drawSingleCounter :: (Int, Int) -> Int -> Int -> Textures -> Picture
+drawSingleCounter (x, y) contaNum numBomb textures =
+       snapPictureToCell (counterImage contaNum numBomb textures) (x, y)
 
 
+
+counterImage :: Int -> Int -> Textures -> Picture
+counterImage numCount bombCount textures = Pictures [
+        Translate (gridSize/3) (gridSize/4) $ Scale 0.3 0.3 (digitImage digit0), -- digit 0
+        Translate (gridSize/5) (gridSize/4) $ Scale 0.3 0.3 (digitImage digit1), -- digit 1 (numero = 1-0)
+        Color gridColor $ rectangleSolid gridSize lineWidth, -- central line
+        Translate (-gridSize/4) (-gridSize/4) $ Scale 0.25 0.25 (bomb textures), -- bomb image
+        Translate (gridSize/3) (-gridSize/4) $ Scale 0.3 0.3 (one textures) -- bomb count
+    ] where digitImage n = fromNumberToPic n textures
+            digit0 = numCount `mod` 10
+            digit1 
+                | numCount < 10 = 0
+                | otherwise = 1
+
+
+fromNumberToPic :: Int -> Textures -> Picture
+fromNumberToPic n textures = digits textures!!n

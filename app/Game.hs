@@ -42,7 +42,10 @@ data Textures = Textures
     noteBomb :: Picture,
     noteOne :: Picture,
     noteTwo :: Picture,
-    noteThree :: Picture
+    noteThree :: Picture,
+    gameOverText :: Picture,
+    gameWonText :: Picture,
+    digits :: [Picture]
   }
   deriving (Eq, Show)
 
@@ -74,13 +77,13 @@ mockupBomb = Cell {
 mockupNumber :: Cell 
 mockupNumber = Cell {
   state = Flipped,
-  content = Three,
+  content = One,
   notes = []
 }
 
 mockupNotes :: Cell 
 mockupNotes = Cell {
-  state = Flipped,
+  state = Covered,
   content = Bomb,
   notes = [One, Two, Bomb]
   }
@@ -88,7 +91,7 @@ mockupNotes = Cell {
 loadWorld :: [Int] -> IO Game
 loadWorld numberList = do
   loadedTextures <- loadTextures 
-  let initialState = GameOver
+  let initialState = Running
   let initialKeys = S.empty
   let initialCursor = (0,0)
   return
@@ -114,6 +117,10 @@ loadTextures = do
   two_note <- loadBMP "img/note_two.bmp"
   three_note <- loadBMP "img/note_three.bmp"
   bomb_note <- loadBMP "img/note_bomb.bmp"
+  gameOver <- loadBMP "img/hai perso.bmp"
+  gameWon <- loadBMP "img/hai vinto.bmp"
+  digit1 <- loadBMP "img/large_one.bmp"
+  let digitsTextures = [digit1]
   return Textures {
     cell = cellTexture,
     bomb = bombTexture,
@@ -123,7 +130,10 @@ loadTextures = do
     noteBomb = bomb_note,
     noteOne = one_note,
     noteTwo = two_note,
-    noteThree = three_note
+    noteThree = three_note,
+    gameOverText = gameOver,
+    gameWonText = gameWon,
+    digits = digitsTextures
   }
 
 toContent :: Int -> Content
@@ -137,6 +147,6 @@ createCell :: Int -> Cell
 createCell number =
   Cell
     { content = toContent number,
-      state = Flipped,
+      state = Covered,
       notes = []
     }
