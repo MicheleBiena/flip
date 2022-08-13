@@ -1,6 +1,6 @@
 module Rendering where
 
-import GHC.Arr (assocs)
+import GHC.Arr (assocs, numElements)
 import Game
 import Graphics.Gloss
 import Graphics.Gloss.Rendering
@@ -23,9 +23,6 @@ notesColor = makeColorI 255 255 0 255 -- Giallo (Note)
 gameAsPicture :: Game -> Picture
 gameAsPicture (Game board state pos textures _) = Pictures [
         cellsOfBoard board textures,
-        drawSingleCounter (0, 5) 0 0 textures,
-        --drawSingleCounter (5, 5) 10 0,
-        --drawSingleCounter (5, 0) 8 0,
         backgroundGrid,
         drawCounters board textures,
         drawGameFinished state board textures,
@@ -34,26 +31,14 @@ gameAsPicture (Game board state pos textures _) = Pictures [
 
 backgroundGrid :: Picture
 backgroundGrid = Color gridColor $ Pictures [
-        Translate 0 0 verticalLine,
-        Translate r 0 verticalLine,
-        Translate (2 * r) 0 verticalLine,
-        Translate (3 * r) 0 verticalLine,
-        Translate (-r) 0 verticalLine,
-        Translate (-2 * r) 0 verticalLine,
-        Translate (-3 * r) 0 verticalLine,
-        Translate 0 0 horizontalLine,
-        Translate 0 r horizontalLine,
-        Translate 0 (2 * r) horizontalLine,
-        Translate 0 (3 * r) horizontalLine,
-        Translate 0 (-r) horizontalLine,
-        Translate 0 (-2 * r) horizontalLine,
-        Translate 0 (-3 * r) horizontalLine
+        pictures $ map (\n -> Translate (n*r) 0 verticalLine) [-3..3],
+        pictures $ map (\n -> Translate 0 (n*r)  horizontalLine) [-3..3]
     ] where r = gridSize
 
 horizontalLine :: Picture
-horizontalLine = rectangleSolid (gridSize * 6) lineWidth
+horizontalLine = rectangleSolid (gridSize * 6 + lineWidth) lineWidth 
 verticalLine :: Picture
-verticalLine = rectangleSolid lineWidth (gridSize * 6)
+verticalLine = rectangleSolid lineWidth (gridSize * 6 + lineWidth)
 
 drawCursor:: (Int, Int) -> Game.State -> Picture
 drawCursor pos Running = color selectColor $ Pictures (createSelectSquare pos)
@@ -113,24 +98,45 @@ drawGameFinished _ _ _ = Blank
 
 -- Contatori laterali
 drawCounters :: Board -> Textures -> Picture
-drawCounters board textures = Blank
+drawCounters board textures = Pictures [
+    pictures $ map ((`drawLineCounters` textures) . filterRow board) [0..4],
+    pictures $ map ((`drawLineCounters` textures) . filterColumn board) [0..4]
+    ]
+
+
+filterRow :: Board -> Int -> [((Int, Int), Cell)]
+filterRow board n = filterWithLambda(\((x,y),_) -> x == n) board
+
+filterColumn :: Board -> Int -> [((Int, Int), Cell)]
+filterColumn board n = filterWithLambda(\((x,y),_) -> y == n) board
+
+drawLineCounters :: [((Int, Int), Cell)] -> Textures -> Picture
+drawLineCounters positions = drawSingleCounter (xcounter, ycounter) contaNum contaBomb
+    where contaNum = sum (map (fromContent . content . snd) positions)
+          contaBomb = length (filter (\(_, e) -> content e == Bomb) positions)
+          (xcounter, ycounter) = countersPosition (map fst positions)
+
+countersPosition :: [(Int, Int)] -> (Int, Int)
+countersPosition positions
+    | fst (head positions) == fst (positions!!1) = (fst(head positions), 5)
+    | otherwise = (5, snd (head positions))
+
 
 drawSingleCounter :: (Int, Int) -> Int -> Int -> Textures -> Picture
 drawSingleCounter (x, y) contaNum numBomb textures =
        snapPictureToCell (counterImage contaNum numBomb textures) (x, y)
 
-
-
 counterImage :: Int -> Int -> Textures -> Picture
 counterImage numCount bombCount textures = Pictures [
-        Translate (gridSize/3) (gridSize/4) $ Scale 0.3 0.3 (digitImage digit0), -- digit 0
-        Translate (gridSize/5) (gridSize/4) $ Scale 0.3 0.3 (digitImage digit1), -- digit 1 (numero = 1-0)
-        Color gridColor $ rectangleSolid gridSize lineWidth, -- central line
-        Translate (-gridSize/4) (-gridSize/4) $ Scale 0.25 0.25 (bomb textures), -- bomb image
-        Translate (gridSize/3) (-gridSize/4) $ Scale 0.3 0.3 (one textures) -- bomb count
+        Translate 0 0 $ counterCell textures, -- sfondo 
+        Translate (gridSize/4) (gridSize/4) $ Scale 0.3 0.3 (digitImage digit0), -- digit 0
+        Translate (gridSize/18) (gridSize/4) $ Scale 0.3 0.3 (digitImage digit1), -- digit 1 (numero = 1-0)
+        Color (makeColorI 0 0 0 255) $ rectangleSolid (gridSize-lineWidth) (lineWidth/2), -- central line
+        Translate (-gridSize/5) (-gridSize/4) $ Scale 0.3 0.3 (smallBomb textures), -- bomb image
+        Translate (gridSize/4) (-gridSize/4) $ Scale 0.3 0.3 (digitImage bombCount) -- bomb count
     ] where digitImage n = fromNumberToPic n textures
             digit0 = numCount `mod` 10
-            digit1 
+            digit1
                 | numCount < 10 = 0
                 | otherwise = 1
 

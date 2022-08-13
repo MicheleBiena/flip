@@ -5,6 +5,7 @@ import GHC.Arr ( Ix(range), array, Array, (//) )
 import Graphics.Gloss (Picture, loadBMP, Point)
 import Graphics.Gloss.Interface.IO.Interact (Key)
 import System.Random (StdGen, mkStdGen, newStdGen, randomR, randomRIO)
+import Text.ParserCombinators.ReadP (count)
 
 data Game = Game
   { board :: Board,
@@ -35,6 +36,7 @@ type Notes = [Content]
 
 data Textures = Textures
   { cell :: Picture,
+    counterCell :: Picture,
     bomb :: Picture,
     one :: Picture,
     two :: Picture,
@@ -45,6 +47,7 @@ data Textures = Textures
     noteThree :: Picture,
     gameOverText :: Picture,
     gameWonText :: Picture,
+    smallBomb :: Picture,
     digits :: [Picture]
   }
   deriving (Eq, Show)
@@ -96,10 +99,11 @@ loadWorld numberList = do
   let initialCursor = (0,0)
   return
     Game
-      { board = array indexRange (zip (range indexRange) (map createCell numberList)) // [((4,4), mockupBomb),
-                                                                                         ((0,0), mockupNumber),
-                                                                                         ((2,2), mockupNotes)] 
-                                                                                         ,
+      { board = array indexRange (zip (range indexRange) (map createCell numberList)) {-// [{-((4,4), mockupBomb),-}
+                                                                                         ((0,0), mockupNumber){-,
+                                                                                         ((2,2), mockupNotes) -}
+                                                                                        ]-},
+                                                                                        
         gameState = initialState,
         cursor = initialCursor,
         gameTextures = loadedTextures,
@@ -108,21 +112,33 @@ loadWorld numberList = do
 
 loadTextures :: IO Textures
 loadTextures = do
-  cellTexture <- loadBMP "img/tile.bmp"
-  bombTexture <- loadBMP "img/bomb.bmp"
-  oneTexture <- loadBMP "img/large_one.bmp"
-  twoTexture <- loadBMP "img/large_two.bmp"
-  threeTexture <- loadBMP "img/large_three.bmp"
-  one_note <- loadBMP "img/note_one.bmp"
-  two_note <- loadBMP "img/note_two.bmp"
-  three_note <- loadBMP "img/note_three.bmp"
-  bomb_note <- loadBMP "img/note_bomb.bmp"
+  cellTexture <- loadBMP "img/casella.bmp"
+  counterCellTexture <- loadBMP "img/casella_contatore.bmp"
+  bombTexture <- loadBMP "img/bomba_casella.bmp"
+  oneTexture <- loadBMP "img/uno_casella.bmp"
+  twoTexture <- loadBMP "img/due_casella.bmp"
+  threeTexture <- loadBMP "img/tre_casella.bmp"
+  one_note <- loadBMP "img/nota_uno.bmp"
+  two_note <- loadBMP "img/nota_due.bmp"
+  three_note <- loadBMP "img/nota_tre.bmp"
+  bomb_note <- loadBMP "img/nota_bomba.bmp"
   gameOver <- loadBMP "img/hai perso.bmp"
   gameWon <- loadBMP "img/hai vinto.bmp"
-  digit1 <- loadBMP "img/large_one.bmp"
-  let digitsTextures = [digit1]
+  smallBombTexture <- loadBMP "img/bomba.bmp"
+  digit0 <- loadBMP "img/zero.bmp"
+  digit1 <- loadBMP "img/uno.bmp"
+  digit2 <- loadBMP "img/due.bmp"
+  digit3 <- loadBMP "img/tre.bmp"
+  digit4 <- loadBMP "img/quattro.bmp"
+  digit5 <- loadBMP "img/cinque.bmp"
+  digit6 <- loadBMP "img/sei.bmp"
+  digit7 <- loadBMP "img/sette.bmp"
+  digit8 <- loadBMP "img/otto.bmp"
+  digit9 <- loadBMP "img/nove.bmp"
+  let digitsTextures = [digit0, digit1, digit2, digit3, digit4, digit5, digit6, digit7, digit8, digit9]
   return Textures {
     cell = cellTexture,
+    counterCell = counterCellTexture,
     bomb = bombTexture,
     one = oneTexture,
     two = twoTexture,
@@ -133,6 +149,7 @@ loadTextures = do
     noteThree = three_note,
     gameOverText = gameOver,
     gameWonText = gameWon,
+    smallBomb = smallBombTexture,
     digits = digitsTextures
   }
 
@@ -142,6 +159,12 @@ toContent 1 = One
 toContent 2 = Two
 toContent 3 = Three
 toContent _ = Bomb
+
+fromContent :: Content -> Int
+fromContent Bomb = 0
+fromContent One = 1
+fromContent Two = 2
+fromContent Three = 3
 
 createCell :: Int -> Cell
 createCell number =

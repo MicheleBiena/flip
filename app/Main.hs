@@ -1,12 +1,13 @@
 module Main where
 
-import GHC.Arr (Array (Array), Ix (index), array, range)
+import GHC.Arr (Array (Array), Ix (index), array, range, assocs)
 import Game
 import Graphics.Gloss (Color, Display (FullScreen, InWindow), makeColor, play)
 import Logic ()
 import Rendering (gameAsPicture)
 import System.Random (Random (random, randomR, randomRs), StdGen, getStdGen, newStdGen, randomRIO, randomRs)
 import System.Random.Shuffle (shuffle')
+import Data.List (group)
 
 gameWindow :: Display
 gameWindow = InWindow "Bomb Flip" (round screenSize, round screenSize) (100, 100)
@@ -16,14 +17,14 @@ backgroundColor = makeColor 0 0 0 0
 
 -- Funzione per generare la lista casuale
 generateList :: StdGen -> [Int]
-generateList g = shuffle' (merge zeros (take (25 - maxBombs) (randomRs (1, 3) g))) 25 g 
+generateList g = shuffle' (merge zeros (take (25 - maxBombs) (randomRs (1, 3) g))) 25 g
   where zeros = replicate maxBombs 0
 
 -- Funzione per unire 2 liste di numeri
 merge :: [Int] -> [Int] -> [Int]
 merge xs [] = xs
 merge [] ys = ys
-merge (x:xs) (y:ys) = x : y : merge xs ys 
+merge (x:xs) (y:ys) = x : y : merge xs ys
 
 main :: IO ()
 main = do
