@@ -1,19 +1,17 @@
 module Main where
 
-import GHC.Arr (Array (Array), Ix (index), array, range, assocs)
-import Game
-import Graphics.Gloss (Color, Display (FullScreen, InWindow), makeColor, play)
-import Logic ()
-import Rendering (gameAsPicture)
-import System.Random (Random (random, randomR, randomRs), StdGen, getStdGen, newStdGen, randomRIO, randomRs)
-import System.Random.Shuffle (shuffle')
-import Data.List (group)
+import Graphics.Gloss ( play, makeColor, Display(InWindow), Color )
+import System.Random ( getStdGen, Random(randomRs), StdGen )
+import Game ( maxBombs, screenSize, loadWorld )
+import Rendering ( gameAsPicture )
+import Logic 
+import System.Random.Shuffle ( shuffle' )
 
 gameWindow :: Display
 gameWindow = InWindow "Bomb Flip" (round screenSize, round screenSize) (100, 100)
 
 backgroundColor :: Color
-backgroundColor = makeColor 0 0 0 0
+backgroundColor = makeColor 0 0 0 255
 
 -- Funzione per generare la lista casuale
 generateList :: StdGen -> [Int]
@@ -31,4 +29,4 @@ main = do
   gen <- getStdGen
   let numberList = generateList gen
   initialWorld <- loadWorld numberList
-  play gameWindow backgroundColor 30 initialWorld gameAsPicture (const id) (const id)
+  play gameWindow backgroundColor 30 initialWorld gameAsPicture transformGame (const id)

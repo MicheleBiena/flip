@@ -11,8 +11,7 @@ data Game = Game
   { board :: Board,
     gameState :: State,
     cursor :: (Int, Int),
-    gameTextures :: Textures,
-    keys :: S.Set Key
+    gameTextures :: Textures
   }
   deriving (Eq, Show)
 
@@ -95,7 +94,6 @@ loadWorld :: [Int] -> IO Game
 loadWorld numberList = do
   loadedTextures <- loadTextures 
   let initialState = Running
-  let initialKeys = S.empty
   let initialCursor = (0,0)
   return
     Game
@@ -106,8 +104,7 @@ loadWorld numberList = do
                                                                                         
         gameState = initialState,
         cursor = initialCursor,
-        gameTextures = loadedTextures,
-        keys = initialKeys
+        gameTextures = loadedTextures
       }
 
 loadTextures :: IO Textures
