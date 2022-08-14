@@ -48,16 +48,16 @@
   <summary>Table of Contents</summary>
   <ol>
     <li>
-      <a href="#about-the-project">About The Project</a>
+      <a href="#about-the-project">Informazioni del Progetto</a>
       <ul>
-        <li><a href="#built-with">Built With</a></li>
+        <li><a href="#built-with">Creato con</a></li>
       </ul>
     </li>
     <li>
-      <a href="#getting-started">Getting Started</a>
+      <a href="#getting-started">Avvio</a>
       <ul>
-        <li><a href="#prerequisites">Prerequisites</a></li>
-        <li><a href="#installation">Installation</a></li>
+        <li><a href="#prerequisites">Prerequisiti</a></li>
+        <li><a href="#installation">Installazione</a></li>
       </ul>
     </li>
   </ol>
@@ -66,13 +66,13 @@
 
 
 <!-- ABOUT THE PROJECT -->
-## About The Project
+## Informazioni del Progetto
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
 
-### Built With
+### Creato con
 
 * [![Haskell][Haskell.org]][Haskell-url]
 * [![Gloss][haskell-gloss]][gloss-url]
@@ -82,28 +82,28 @@
 
 
 <!-- GETTING STARTED -->
-## Getting Started
+## Avvio
 
-To get a local copy up and running follow these simple example steps.
+Per ottenere una copia locale, segui i seguenti passaggi.
 
-### Prerequisites
+### Prerequisiti
 
-Install stack on your computer:
+Installa stack sul tuo computer:
 https://docs.haskellstack.org/en/stable/README/
 
-### Installation
+### Installazione
 
-1. Clone the repo
+1. Clona la repository
    ```sh
    git clone https://github.com/TrainerFromHoenn/flip.git
    ```
-3. Build it with stack
+3. Compila l'eseguibile con Stack
    ```sh
    cd .\flip\
    stack setup
    stack build
    ```
-4. Execute 
+4. Esegui
    ```sh
    stack run
    ```
@@ -113,9 +113,9 @@ https://docs.haskellstack.org/en/stable/README/
 
 
 <!-- USAGE EXAMPLES -->
-## Usage
+## Utiizzo
 
-1. Select the difficulty level from 1 to 7 -> A wrong input will crash the executable
+1. Seleziona il livello di difficoltà da 1 a 7 -> Un input scorretto bloccherà l'esecuzione
    ```sh
    Inserisci livello di difficoltà 1 - 7
    5
@@ -140,7 +140,7 @@ https://docs.haskellstack.org/en/stable/README/
 
 
 <!-- CONTACT -->
-## Contact
+## Contacts
 
 michelebiena@gmail.com
 

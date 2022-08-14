@@ -11,7 +11,7 @@ import Data.Ix
 import Control.Monad
 
 levels :: [[[Int]]]
-levels = [
+levels = [ -- [quantità 2, quantità 3, quantità bombe]
   [[5, 0, 6], [4, 1, 6], [3, 1, 6], [2, 2, 6], [0, 3, 6]], -- 1
   [[6, 0, 7], [5, 1, 7], [3, 2, 7], [1, 3, 7], [0, 4, 7]], -- 2
   [[7, 0, 8], [6, 1, 8], [4, 2, 8], [2, 3, 8], [1, 4, 8]], -- 3
