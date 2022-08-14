@@ -74,8 +74,8 @@
 
 ### Built With
 
-* [![Haskell][Haskell.org][Haskell-url]]
-* [![Gloss][hackage.haskell.org/package/gloss][gloss-url]]
+* [![Haskell][Haskell.org]][Haskell-url]
+* [![Gloss][haskell-gloss]][gloss-url]
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -142,7 +142,7 @@ https://docs.haskellstack.org/en/stable/README/
 <!-- CONTACT -->
 ## Contact
 
-Your Name - michelebiena@gmail.com
+michelebiena@gmail.com
 
 Project Link: [https://github.com/TrainerFromHoenn/flip](https://github.com/TrainerFromHoenn/flip)
 
@@ -155,6 +155,8 @@ Project Link: [https://github.com/TrainerFromHoenn/flip](https://github.com/Trai
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
+[Haskell.org]: https://img.shields.io/badge/Haskell-Haskell.org-blueviolet
+[haskell-gloss]: https://img.shields.io/badge/Haskell--Gloss-Gloss-blue
 [Haskell-url]: https://www.haskell.org/
 [gloss-url]: https://hackage.haskell.org/package/gloss
 [contributors-shield]: https://img.shields.io/github/contributors/TrainerFromHoenn/flip.svg?style=for-the-badge
