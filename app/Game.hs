@@ -27,7 +27,7 @@ data Cell = Cell
   }
   deriving (Eq, Show)
 
-data Content = Bomb | One | Two | Three deriving (Eq, Show)
+data Content = Bomb | One | Two | Three deriving (Eq, Show, Ord)
 
 data CellState = Flipped | Covered deriving (Eq, Show)
 
