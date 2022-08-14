@@ -51,8 +51,6 @@ data Textures = Textures
   }
   deriving (Eq, Show)
 
-maxBombs :: Int
-maxBombs = 7
 
 gridSize :: Float
 gridSize = 120

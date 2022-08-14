@@ -82,7 +82,7 @@ checkGameOver game
 -- Controllo vittoria
 checkGameWon :: Game -> Game
 checkGameWon game
-    | null (filterWithLambda ( \(_,e) -> state e == Covered && content e /= Bomb) b) = game {gameState = GameWon}
+    | null (filterWithLambda ( \(_,e) -> state e == Covered && content e /= Bomb && content e /= One) b) = game {gameState = GameWon}
     | otherwise = game
     where b = board game
 
