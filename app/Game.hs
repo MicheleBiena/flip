@@ -67,27 +67,6 @@ n = 5 -- Tabella 5 x 5
 indexRange :: ((Int, Int), (Int, Int))
 indexRange = ((0, 0), (n - 1, n - 1))
 
-mockupBomb :: Cell
-mockupBomb = Cell {
-  state = Flipped,
-  content = Bomb,
-  notes = []
-} 
-
-mockupNumber :: Cell 
-mockupNumber = Cell {
-  state = Flipped,
-  content = One,
-  notes = []
-}
-
-mockupNotes :: Cell 
-mockupNotes = Cell {
-  state = Covered,
-  content = Bomb,
-  notes = [One, Two, Bomb]
-  }
-
 loadWorld :: [Int] -> IO Game
 loadWorld numberList = do
   loadedTextures <- loadTextures 
@@ -95,10 +74,7 @@ loadWorld numberList = do
   let initialCursor = (0,0)
   return
     Game
-      { board = array indexRange (zip (range indexRange) (map createCell numberList)) {-// [{-((4,4), mockupBomb),-}
-                                                                                         ((0,0), mockupNumber){-,
-                                                                                         ((2,2), mockupNotes) -}
-                                                                                        ]-},
+      { board = array indexRange (zip (range indexRange) (map createCell numberList)),
                                                                                         
         gameState = initialState,
         cursor = initialCursor,

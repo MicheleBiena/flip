@@ -47,8 +47,6 @@ main = do
   level <- getLine
   let levelNumber = read level :: Int
   let numberList = generateList gen levelNumber
-  print levelNumber
-  print (levels!!(levelNumber - 1)!!fst (randomR (0,4) gen))
   initialWorld <- loadWorld numberList
   play gameWindow backgroundColor 30 initialWorld gameAsPicture transformGame (const id)
 
