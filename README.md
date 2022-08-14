@@ -89,7 +89,7 @@ Per ottenere una copia locale, segui i seguenti passaggi.
 ### Prerequisiti
 
 Installa stack sul tuo computer:
-https://docs.haskellstack.org/en/stable/README/
+https://docs.haskellstack.org/en/stable/install_and_upgrade/
 
 ### Installazione
 
